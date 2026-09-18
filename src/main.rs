@@ -146,7 +146,15 @@ fn run() -> Result<i32, CliError> {
             }
             Ok(code)
         }
-        Subcommand::Update => update::run_update("proven", VERSION).map_err(CliError::Runtime),
+        Subcommand::Update => {
+            let (code, output) =
+                update::run_update("proven", VERSION, config.format)
+                    .map_err(CliError::Runtime)?;
+            if !config.quiet || config.output_file.is_some() {
+                write_output(&output, config.output_file.as_ref())?;
+            }
+            Ok(code)
+        }
         _ => run_app(&config),
     }
 }
