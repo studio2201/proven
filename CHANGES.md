@@ -6,6 +6,17 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.2.5] — 2026-09-18
+
+### Added
+- Expanded documentation in README with authoritative problem descriptions and citations:
+  - OpenSSF SLSA v1.0 specification and Build Level 3 requirements.
+  - NIST FIPS 204 (ML-DSA-65) post-quantum digital signature standards.
+  - White House Executive Order 14028 software supply chain directives.
+  - in-toto Attestation Framework v1 metadata specifications.
+- Added comprehensive "How It Works Under the Hood" architectural breakdown.
+- Upgraded release metadata and diagnostic baseline.
+
 ## [0.2.4] — 2026-09-18
 
 ### Added
