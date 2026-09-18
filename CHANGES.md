@@ -9,6 +9,14 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 ### Added
 - (placeholder — next iteration's changes land here)
 
+## [0.1.2] — 2026-09-17
+
+### Changed
+- `README.md` rewritten to drop openOODA substrate references
+  (Merkle AST / ML-DSA-65 / opm / "SLSA L3+ on openOODA" removed).
+  Reproducible-builds narrative reframed on (host, rustc-version,
+  Cargo.lock) byte-identity hashing.
+
 ## [0.1.1] — 2026-09-17
 
 ### Added

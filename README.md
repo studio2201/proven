@@ -1,16 +1,16 @@
 # Proven
 
-**PQC-signed supply-chain attestor.** Merkle AST + ML-DSA-65 + opm. SLSA L3+ on openOODA.
+**PQC-signed supply-chain attestor.** Reproducible builds with byte-identity hashing keyed on `(host, rustc-version, Cargo.lock)`. Pre-1.0.0 services use GHSA-only security advisories; CVEs at ≥ 1.0.0.
 
 **Status:** pre-release scaffold (2026-09-17). No source code yet.
 
 ## What it does
 
-Sign every published artifact with an ML-DSA-65 attestation that includes:
+Sign every published artifact with a reproducibility attestation that includes:
 - Source commit hash
 - Build environment fingerprint
 - Dependency Merkle root
-- Runtime cap-token matrix
+- Runtime capability matrix
 
 Compatible with existing SLSA pipelines. Air-gappable. Reproducible.
 
@@ -22,7 +22,7 @@ Compatible with existing SLSA pipelines. Air-gappable. Reproducible.
 
 ## Commercial plane
 
-Hosted attestation ledger + multi-sig ML-DSA-65 + Ed25519 transition signing for the 2030 window.
+Hosted attestation ledger + multi-sig PQC + Ed25519 transition signing for the 2030 window.
 
 ## License
 
