@@ -7,6 +7,11 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- (placeholder — next iteration's changes land here)
+
+## [0.1.1] — 2026-09-17
+
+### Added
 - §15 threat model: `docs/threat-model.md` (proven-specific adversary:
   attacker who poisons the build environment between source commit and
   published binary artifact)
