@@ -1,0 +1,32 @@
+name: 'Proven Supply-Chain Attestor'
+description: 'Generates byte-identity hashes and SLSA attestations'
+author: 'studio2201'
+branding:
+  icon: 'check-circle'
+  color: 'blue'
+
+inputs:
+  path:
+    description: 'Target binary or artifact path to attest'
+    required: true
+  output:
+    description: 'Output attestation destination'
+    required: false
+    default: 'attestation.json'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Set up Rust
+      uses: dtolnay/rust-toolchain@stable
+
+    - name: Build proven
+      shell: bash
+      run: |
+        cargo build --release --manifest-path "${{ github.action_path }}/Cargo.toml"
+        echo "${{ github.action_path }}/target/release" >> $GITHUB_PATH
+
+    - name: Run Proven Attest
+      shell: bash
+      run: |
+        proven sign "${{ inputs.path }}" --output "${{ inputs.output }}"
