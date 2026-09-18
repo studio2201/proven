@@ -1,0 +1,14 @@
+[package]
+name = "proven"
+version = "0.2.0"
+edition = "2021"
+publish = false
+description = "PQC-signed supply-chain attestor and bit-reproducibility verifier"
+authors = ["studio2201"]
+license = "Apache-2.0"
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+strip = true
+panic = "abort"

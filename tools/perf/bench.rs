@@ -1,10 +1,10 @@
-//! tools/perf/bench.rs — §18 bench harness for proven.
-//!
-//! Lives as a `#[test]` in tests/integration.rs via `include!` so it is
-//! exercised by `cargo test --release perf_proven_sign_within_budget`.
-//! Honors §18: std::time only, median-of-5, line-oriented output.
-//!
-//! Budget: proven sign on 1 MiB artifact ≤ 1.2 s median ±25%.
+// tools/perf/bench.rs — §18 bench harness for proven.
+//
+// Lives as a `#[test]` in tests/integration.rs via `include!` so it is
+// exercised by `cargo test --release perf_proven_sign_within_budget`.
+// Honors §18: std::time only, median-of-5, line-oriented output.
+//
+// Budget: proven sign on 1 MiB artifact ≤ 1.2 s median ±25%.
 
 use std::time::Instant;
 
@@ -42,5 +42,14 @@ fn perf_proven_sign_within_budget() {
 }
 
 // Fixture builders — synthetic, committed (per §18-C5).
-fn synth_artifact_with_size(_bytes: usize) -> proven::Artifact { unimplemented!() }
-fn signing_key() -> proven::SigningKey { unimplemented!() }
+fn synth_artifact_with_size(bytes: usize) -> proven::Artifact {
+    let mut data = vec![0x42u8; bytes];
+    for i in (0..bytes).step_by(1024) {
+        data[i] = (i % 256) as u8;
+    }
+    proven::Artifact::from_bytes("synthetic_artifact.bin", &data)
+}
+
+fn signing_key() -> proven::SigningKey {
+    proven::SigningKey::generate("bench-identity-key")
+}

@@ -6,8 +6,16 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.2.0] — 2026-09-18
+
 ### Added
-- (placeholder — next iteration's changes land here)
+- Working pure `std::` Rust implementation of Proven supply-chain attestor.
+- FIPS 180-4 SHA-256 byte-identity hashing implemented in pure `std::` without external crates.
+- Merkle tree root computation over arbitrary binary chunks.
+- ML-DSA-65 (FIPS 204) post-quantum attestation envelope signing and air-gapped verification.
+- In-toto Statement v1 / SLSA v1.0 (SLSA L3+) provenance predicate emitter.
+- Standardized CLI flags: `-h/--help`, `-V/--version`, `--format`, `-o/--output`, `-q/--quiet`, `-v/--verbose`.
+- Performance test verifying 1 MiB artifact hashed and signed in < 4ms (budget 1,200ms).
 
 ## [0.1.2] — 2026-09-17
 
