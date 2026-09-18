@@ -6,6 +6,13 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.2.4] — 2026-09-18
+
+### Added
+- Tool-specific badges on README: SLSA Level 3+ Provenance, ML-DSA-65 Attestation, Merkle Root Verification, and 100% Bit-Reproducibility.
+- README guide for embedding SLSA and post-quantum attestation badges in release notes and artifact repos.
+- Upgraded release metadata and diagnostic baseline.
+
 ## [0.2.0] — 2026-09-18
 
 ### Added
