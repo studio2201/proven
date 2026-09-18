@@ -2,7 +2,7 @@
 
 **PQC-signed supply-chain attestor.** Reproducible builds with byte-identity hashing keyed on `(host, rustc-version, Cargo.lock)`. Pre-1.0.0 services use GHSA-only security advisories; CVEs at ≥ 1.0.0.
 
-**Status:** pre-release scaffold (2026-09-17). No source code yet.
+**Status:** v0.2.0 release (2026-09-18).
 
 ## What it does
 
