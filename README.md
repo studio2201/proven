@@ -1,16 +1,8 @@
 # Proven
 
-[![CI](https://github.com/studio2201/proven/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/studio2201/proven/actions/workflows/ci.yml)
-[![Release](https://img.shields.io/badge/version-v0.2.6-blue.svg)](https://github.com/studio2201/proven/releases)
+[![studio2201 Suite](https://img.shields.io/badge/studio2201-5%2F5%20Verified-2f6f5e?logo=shield)](https://studio2201.com/agents#badges)
+[![Release](https://img.shields.io/badge/version-v0.2.7-blue.svg)](https://github.com/studio2201/proven/releases)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
-[![Pure std::](https://img.shields.io/badge/pure-std%3A%3A-success.svg)](https://studio2201.com)
-[![Reproducible](https://img.shields.io/badge/reproducible-OK-brightgreen.svg)](tools/dev/repro.sh)
-[![Max LOC](https://img.shields.io/badge/max%20LOC-%E2%89%A4256-brightgreen.svg)](https://studio2201.com)
-
-[![SLSA Level](https://img.shields.io/badge/SLSA-Level%203%2B-blue.svg)](https://studio2201.com/proven)
-[![Attestation](https://img.shields.io/badge/attestation-ML--DSA--65-blueviolet.svg)](https://studio2201.com/proven)
-[![Merkle Proof](https://img.shields.io/badge/merkle%20root-VERIFIED-brightgreen.svg)](https://studio2201.com/proven)
-[![Bit-Reproducibility](https://img.shields.io/badge/reproducible-bit--identical-brightgreen.svg)](https://studio2201.com/proven)
 
 **PQC-signed supply-chain attestor.** Bit-reproducible build verification and byte-identity hashing. Air-gappable, post-2030 valid.
 
