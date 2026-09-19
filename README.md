@@ -1,7 +1,7 @@
 # Proven
 
 [![CI](https://github.com/studio2201/proven/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/studio2201/proven/actions/workflows/ci.yml)
-[![Release](https://img.shields.io/badge/version-v0.2.5-blue.svg)](https://github.com/studio2201/proven/releases)
+[![Release](https://img.shields.io/badge/version-v0.2.6-blue.svg)](https://github.com/studio2201/proven/releases)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 [![Pure std::](https://img.shields.io/badge/pure-std%3A%3A-success.svg)](https://studio2201.com)
 [![Reproducible](https://img.shields.io/badge/reproducible-OK-brightgreen.svg)](tools/dev/repro.sh)
@@ -14,18 +14,50 @@
 
 **PQC-signed supply-chain attestor.** Bit-reproducible build verification and byte-identity hashing. Air-gappable, post-2030 valid.
 
-## Why This Matters & Authoritative Mandates
+## Why This Action Is Needed
 
-### 1. The Build Tampering Threat (SolarWinds & XZ Utils)
-A clean Git commit does not guarantee a clean binary. If a build server, developer workstation, or distribution mirror is compromised, backdoors are injected *after* code review. Provenance proves that the binary artifact was produced by an authenticated builder from verified source code without post-compilation tampering.
-- **[OpenSSF SLSA Specification v1.0](https://slsa.dev/spec/v1.0/)**: Supply-chain Levels for Software Artifacts. SLSA Build Level 3 requires hermetic, isolated builds with non-falsifiable provenance.
-- **[in-toto Attestation Framework v1](https://in-toto.io/Statement/v1)**: Standard metadata model binding subject digests to authenticated build definitions.
-- **[White House Executive Order 14028](https://www.whitehouse.gov/briefing-room/presidential-actions/2021/05/12/executive-order-on-improving-the-nations-cybersecurity/)**: Mandates software supply chain security and provenance verification across federal procurement.
+### Build Tampering & Post-Quantum Provenance
+A clean Git commit does not guarantee a clean binary. If a CI builder, package repository, or distribution mirror is compromised, backdoors are injected post-compilation (e.g. SolarWinds, XZ Utils CVE-2024-3094). Release integrity requires immutable, cryptographically verifiable provenance binding the binary directly to its source.
+- **[White House Executive Order 14028](https://www.whitehouse.gov/briefing-room/presidential-actions/2021/05/12/executive-order-on-improving-the-nations-cybersecurity/)**: Mandates non-falsifiable software provenance and supply-chain attestations for enterprise software procurement.
+- **[OpenSSF SLSA Specification v1.0](https://slsa.dev/spec/v1.0/)**: SLSA Build Level 3+ requires hermetic, reproducible builds with authenticated in-toto attestations.
+- **[NIST FIPS 204 (ML-DSA)](https://csrc.nist.gov/pubs/fips/204/final)**: Standardizes post-quantum lattice-based digital signatures, ensuring release attestations remain unforgeable past 2030.
+- **Automated CI Gates vs Manual Verification**: Manual verification of checksums and signatures is easily skipped during urgent releases. Proven automates binary hashing, Merkle tree construction, and ML-DSA-65 attestation generation directly within CI pipelines.
 
-### 2. Quantum Signature Obsolescence (Post-2030 Horizon)
-Conventional digital signatures (RSA, ECDSA, Ed25519) rely on factoring and discrete logarithms. When cryptanalytically relevant quantum computers emerge, Shor's algorithm will crack legacy signatures, enabling retro-forgery of software releases.
-- **[NIST FIPS 204 (ML-DSA)](https://csrc.nist.gov/pubs/fips/204/final)**: Module-Lattice-Based Digital Signature Standard (August 2024). Standardizes ML-DSA-65 (NIST Category 3, 192-bit classical strength) based on hard lattice problems.
-- **[White House OMB M-26-15](https://www.whitehouse.gov/wp-content/uploads/2022/11/M-23-02-M-Memo-on-Migrating-to-Post-Quantum-Cryptography.pdf)**: Establishes the federal timeline requiring post-quantum cryptographic transitions by Dec 31, 2030.
+## Autonomous Agent Integration
+
+Deploy Proven into your release and CI pipelines using your AI coding assistant or copy the workflow below.
+
+### Prompt for your AI Agent
+
+Copy and paste this prompt to Cursor, Claude Code, Copilot Workspace, or Devin:
+
+```text
+Add a GitHub Actions workflow to this repository at .github/workflows/proven.yml using studio2201/proven@master. Trigger on release tags and pull requests, verify bit-reproducibility of compiled artifacts, generate SLSA Level 3+ build provenance, and sign binaries with post-quantum ML-DSA-65 attestations.
+```
+
+### GitHub Actions Workflow
+
+Commit this complete, production-ready workflow at `.github/workflows/proven.yml`:
+
+```yaml
+name: Proven Supply-Chain Attestor
+on:
+  push:
+    tags: [ 'v*' ]
+  pull_request:
+    branches: [ master, main ]
+permissions:
+  contents: read
+jobs:
+  proven-attest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Attest Artifact Provenance
+        uses: studio2201/proven@master
+        with:
+          path: '.'
+```
 
 ## How It Works Under the Hood
 
@@ -52,18 +84,6 @@ proven verify target/release/binary --attestation attestation.json
 
 # Run system diagnostics
 proven doctor
-```
-
-## GitHub Action Usage
-
-Attest release artifacts in CI workflows:
-
-```yaml
-- name: Proven Supply-Chain Attestor
-  uses: studio2201/proven@master
-  with:
-    path: 'target/release/my-app'
-    output: 'attestation.json'
 ```
 
 ## CLI Commands

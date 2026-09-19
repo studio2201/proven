@@ -17,16 +17,51 @@ inputs:
 runs:
   using: 'composite'
   steps:
-    - name: Set up Rust
-      uses: dtolnay/rust-toolchain@stable
-
-    - name: Build proven
+    - name: Fast Bootstrap proven
       shell: bash
       run: |
-        cargo build --release --manifest-path "${{ github.action_path }}/Cargo.toml"
-        echo "${{ github.action_path }}/target/release" >> $GITHUB_PATH
+        DEST="${XDG_BIN_HOME:-$HOME/.local/bin}"
+        mkdir -p "$DEST"
+        if ! command -v proven >/dev/null 2>&1; then
+          if [ -f "${{ github.action_path }}/../install.sh" ]; then
+            sh "${{ github.action_path }}/../install.sh" --dest "$DEST" proven
+          elif [ -f "${{ github.action_path }}/install.sh" ]; then
+            sh "${{ github.action_path }}/install.sh" --dest "$DEST" proven
+          else
+            curl -fsSL --retry 3 https://studio2201.com/install.sh | sh -s -- --dest "$DEST" proven
+          fi
+        fi
+        echo "$DEST" >> "$GITHUB_PATH"
 
-    - name: Run Proven Attest
+    - name: Run Proven Attest & Verify
       shell: bash
       run: |
-        proven sign "${{ inputs.path }}" --output "${{ inputs.output }}"
+        export PATH="${XDG_BIN_HOME:-$HOME/.local/bin}:$PATH"
+        set +e
+        proven sign "${{ inputs.path }}" -f json -o "${{ inputs.output }}" > proven_summary.md 2>&1 || \
+          proven sign "${{ inputs.path }}" --format json -o "${{ inputs.output }}" > proven_summary.md 2>&1
+        EC=$?
+        proven verify "${{ inputs.path }}" --attestation "${{ inputs.output }}" >> proven_summary.md 2>&1
+        VEC=$?
+        set -e
+
+        [ $VEC -ne 0 ] && EC=$VEC
+        STATUS="🟢 ATTESTED"
+        BADGE="https://img.shields.io/badge/Proven-ATTESTED-brightgreen"
+        if [ $EC -ne 0 ]; then
+          STATUS="🔴 VERIFICATION FAILED"
+          BADGE="https://img.shields.io/badge/Proven-FAILED-red"
+        fi
+
+        if [ -n "$GITHUB_STEP_SUMMARY" ]; then
+          {
+            echo "## 🔏 Proven Supply-Chain Attestation"
+            echo ""
+            echo "| Status | Algorithm | Standard | Badge |"
+            echo "| :---: | :---: | :---: | :---: |"
+            echo "| **${STATUS}** | \`ML-DSA-65\` | \`SLSA Level 3+\` | ![Proven](${BADGE}) |"
+            echo ""
+          } >> "$GITHUB_STEP_SUMMARY"
+          cat proven_summary.md >> "$GITHUB_STEP_SUMMARY"
+        fi
+        exit $EC
