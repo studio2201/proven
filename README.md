@@ -64,10 +64,7 @@ Add a GitHub Actions workflow to this repository at .github/workflows/proven.yml
 - Permissions: contents: read, checkout with fetch-depth: 0.
 - Action: run studio2201/studio2201@v1 with tools: 'proven' and fail-on: 'block'.
 - Artifacts: upload proven_report.md using actions/upload-artifact@v4 with if: always().
-- README Badge: add dynamic Shields.io workflow status badge to top of README.md (replace <owner>/<repo>):
-  [![proven][b-proven]][ci-proven]
-  [b-proven]: https://img.shields.io/github/actions/workflow/status/<owner>/<repo>/proven.yml?label=proven&logo=shield
-  [ci-proven]: https://github.com/<owner>/<repo>/actions/workflows/proven.yml
+- README Scorecard: embed the studio2201 Centered Scorecard table at top of README.md (specs: studio2201.com/agents).
 ```
 
 ### GitHub Actions Workflow
