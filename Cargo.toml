@@ -1,9 +1,9 @@
 [package]
 name = "proven"
-version = "0.2.11"
+version = "0.2.12"
 edition = "2021"
 publish = false
-description = "PQC-signed supply-chain attestor and bit-reproducibility verifier"
+description = "Supply-chain artifact attestor (SHA-256, Merkle root, HMAC-SHA256)"
 authors = ["studio2201"]
 license = "Apache-2.0"
 

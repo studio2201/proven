@@ -76,7 +76,7 @@ runs:
             echo ""
             echo "| Status | Algorithm | Standard | Badge |"
             echo "| :---: | :---: | :---: | :---: |"
-            echo "| **${STATUS}** | \`ML-DSA-65\` | \`SLSA Level 3+\` | ![Proven](${BADGE}) |"
+            echo "| **${STATUS}** | \`HMAC-SHA256\` | \`in-toto v1\` | ![Proven](${BADGE}) |"
             echo ""
           } >> "$GITHUB_STEP_SUMMARY"
           cat proven_summary.md >> "$GITHUB_STEP_SUMMARY"

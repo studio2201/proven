@@ -1,4 +1,4 @@
-//! report.rs — Emits SLSA L3+ statements, JSON envelopes, and terminal verification summaries.
+//! report.rs — Emits in-toto v1 JSON envelopes and terminal verification summaries.
 
 use crate::sign::Attestation;
 use crate::verify::VerificationResult;
@@ -50,7 +50,7 @@ pub fn emit_text_attestation(attestation: &Attestation) -> String {
 pub fn emit_verification_text(res: &VerificationResult) -> String {
     let mut out = String::new();
     if res.verified {
-        out.push_str("proven verification: PASSED (bit-reproducible & PQC signature valid)\n");
+        out.push_str("proven verification: PASSED (SHA-256, Merkle root, and HMAC-SHA256 valid)\n");
         for c in &res.checks_passed {
             out.push_str(&format!("  ✓ {}\n", c));
         }

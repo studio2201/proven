@@ -1,9 +1,10 @@
-//! sign.rs — ML-DSA-65 post-quantum signing envelope for artifacts and manifests.
-//! Derives SLSA L3+ compatible attestation in pure std::.
-
+//! sign.rs — RFC 2104 HMAC-SHA256 attestation signing in pure std:: Rust.
 use crate::artifact::{hex_encode, sha256_digest, Artifact};
 use crate::merkle::compute_artifact_merkle;
 use std::fmt;
+
+pub const ALGO_NAME: &str = "HMAC-SHA256 (FIPS 198-1)";
+pub const PROVENANCE_STANDARD: &str = "in-toto v1 (SHA-256 + Merkle)";
 
 #[derive(Debug, Clone)]
 pub struct SigningKey {
@@ -13,13 +14,23 @@ pub struct SigningKey {
 
 impl SigningKey {
     pub fn generate(key_id: &str) -> Self {
-        let mut seed = [0u8; 32];
-        for (i, b) in key_id.bytes().enumerate() {
-            seed[i % 32] ^= b;
-        }
         SigningKey {
             key_id: key_id.to_string(),
-            raw_seed: seed,
+            raw_seed: sha256_digest(key_id.as_bytes()),
+        }
+    }
+
+    pub fn from_secret(key_id: &str, secret: &[u8]) -> Self {
+        SigningKey {
+            key_id: key_id.to_string(),
+            raw_seed: sha256_digest(secret),
+        }
+    }
+
+    pub fn from_env(key_id: &str) -> Self {
+        match std::env::var("PROVEN_SIGNING_KEY") {
+            Ok(s) if !s.is_empty() => Self::from_secret(key_id, s.as_bytes()),
+            _ => Self::generate(key_id),
         }
     }
 }
@@ -46,32 +57,66 @@ impl fmt::Display for SignError {
 
 impl std::error::Error for SignError {}
 
+pub fn hmac_sha256(key: &[u8], msg: &[u8]) -> [u8; 32] {
+    let mut k0 = [0u8; 64];
+    if key.len() > 64 {
+        k0[..32].copy_from_slice(&sha256_digest(key));
+    } else {
+        k0[..key.len()].copy_from_slice(key);
+    }
+    let mut inner = Vec::with_capacity(64 + msg.len());
+    let mut outer = Vec::with_capacity(96);
+    for b in k0 {
+        inner.push(b ^ 0x36);
+        outer.push(b ^ 0x5c);
+    }
+    inner.extend_from_slice(msg);
+    let inner_hash = sha256_digest(&inner);
+    outer.extend_from_slice(&inner_hash);
+    sha256_digest(&outer)
+}
+
+pub fn ct_eq(a: &[u8], b: &[u8]) -> bool {
+    if a.len() != b.len() {
+        return false;
+    }
+    let mut diff = 0u8;
+    for (&x, &y) in a.iter().zip(b.iter()) {
+        diff |= x ^ y;
+    }
+    diff == 0
+}
+
+pub fn canonical_payload(sha256: &str, merkle_root: &str, key_id: &str) -> Vec<u8> {
+    format!("{}:{}:{}", sha256, merkle_root, key_id).into_bytes()
+}
+
 pub fn sign_artifact(artifact: &Artifact, key: &SigningKey) -> Result<Attestation, SignError> {
     let merkle_root = compute_artifact_merkle(&artifact.bytes, 65536);
-
-    // Formulate the canonical attestation payload
-    let mut payload = Vec::new();
-    payload.extend_from_slice(artifact.sha256.as_bytes());
-    payload.push(b':');
-    payload.extend_from_slice(merkle_root.as_bytes());
-    payload.push(b':');
-    payload.extend_from_slice(key.key_id.as_bytes());
-
-    // FIPS 204 ML-DSA-65 signature envelope representation
-    let mut sig_material = [0u8; 64];
-    let h1 = sha256_digest(&payload);
-    let h2 = sha256_digest(&key.raw_seed);
-    sig_material[..32].copy_from_slice(&h1);
-    sig_material[32..].copy_from_slice(&h2);
-    let final_sig = sha256_digest(&sig_material);
+    let payload = canonical_payload(&artifact.sha256, &merkle_root, &key.key_id);
+    let sig = hmac_sha256(&key.raw_seed, &payload);
 
     Ok(Attestation {
         artifact_name: artifact.name.clone(),
         artifact_sha256: artifact.sha256.clone(),
         merkle_root,
-        algorithm: "ML-DSA-65 (FIPS 204)".to_string(),
+        algorithm: ALGO_NAME.to_string(),
         key_id: key.key_id.clone(),
-        signature_hex: hex_encode(&final_sig),
-        slsa_level: "SLSA L3+".to_string(),
+        signature_hex: hex_encode(&sig),
+        slsa_level: PROVENANCE_STANDARD.to_string(),
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_hmac_sha256_vector() {
+        let mac = hmac_sha256(b"key", b"The quick brown fox jumps over the lazy dog");
+        assert_eq!(
+            hex_encode(&mac),
+            "f7bc83f430538424b13298e6aa6fb143ef4d59a14946175997479dbc2d1a3cd8"
+        );
+    }
 }

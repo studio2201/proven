@@ -47,7 +47,7 @@ fn parse_attestation_json(content: &str) -> Result<Attestation, String> {
     let mut name = "artifact".to_string();
     let mut sha256 = String::new();
     let mut merkle = String::new();
-    let mut algo = "ML-DSA-65 (FIPS 204)".to_string();
+    let mut algo = String::new();
     let mut key_id = "key".to_string();
     let mut sig = String::new();
 
@@ -72,7 +72,7 @@ fn parse_attestation_json(content: &str) -> Result<Attestation, String> {
         algorithm: algo,
         key_id,
         signature_hex: sig,
-        slsa_level: "SLSA L3+".into(),
+        slsa_level: "in-toto v1 (SHA-256 + Merkle)".into(),
     })
 }
 
@@ -114,7 +114,7 @@ fn run_app(config: &CliConfig) -> Result<i32, CliError> {
         return Ok(if res.verified { 0 } else { 1 });
     }
 
-    let key = SigningKey::generate(&config.key_id);
+    let key = SigningKey::from_env(&config.key_id);
     let attestation = sign(&artifact, &key).map_err(|e| format!("Attestation failed: {}", e))?;
 
     let output = match config.format {

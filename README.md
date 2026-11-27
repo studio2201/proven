@@ -2,7 +2,7 @@
 
 <div align="center">
 
-[![Release](https://img.shields.io/badge/version-v0.2.10-blue.svg)](https://github.com/studio2201/proven/releases)
+[![Release](https://img.shields.io/badge/version-v0.2.12-blue.svg)](https://github.com/studio2201/proven/releases)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 
 | Security Pillar | Verification Badge |
@@ -11,7 +11,7 @@
 | **Credential Defense** | [![snip][b-snip]][u-snip] |
 | **Supply Chain Surface** | [![vigil][b-vigil]][u-vigil] |
 | **Post-Quantum Cryptography** | [![aegis][b-aegis]][u-aegis] |
-| **Build Provenance & SLSA** | [![proven][b-proven]][u-proven] |
+| **Build Integrity** | [![proven][b-proven]][u-proven] |
 | **Repository Governance** | [![boneyard][b-boneyard]][u-boneyard] |
 
 [b-studio]: https://img.shields.io/badge/secured%20by-studio2201-2f6f5e?logo=shield
@@ -22,31 +22,27 @@
 [u-vigil]: https://studio2201.com/vigil
 [b-aegis]: https://img.shields.io/badge/aegis-PQC%20compliant-2f6f5e?logo=shield
 [u-aegis]: https://studio2201.com/aegis
-[b-proven]: https://img.shields.io/badge/proven-ML--DSA--65%20verified-2f6f5e?logo=shield
+[b-proven]: https://img.shields.io/badge/proven-SHA--256%20%2B%20Merkle-2f6f5e?logo=shield
 [u-proven]: https://studio2201.com/proven
 [b-boneyard]: https://img.shields.io/badge/boneyard-maintained-2f6f5e?logo=shield
 [u-boneyard]: https://studio2201.com/boneyard
 
 </div>
 
-**PQC-signed supply-chain attestor.** Computes bit-identity SHA-256 and Merkle roots, signs in-toto
-provenance with NIST FIPS 204 ML-DSA-65, and asserts SLSA Level 3+ build reproducibility.
+**Supply-chain artifact attestor.** Computes bit-identity SHA-256 and 64 KiB Merkle roots, signs in-toto provenance envelopes with pure `std::` RFC 2104 HMAC-SHA256 (FIPS 198-1), and verifies build artifacts offline.
 
 ## Why This Action Is Needed
 
-### The Tampered Build Vector & Provenance Mandates
+### The Tampered Build Vector & Provenance Integrity
 A clean Git commit does not guarantee a clean binary. If a CI builder, package repository, or
 distribution mirror is compromised, backdoors are injected post-compilation (e.g. SolarWinds,
-XZ Utils CVE-2024-3094). Release integrity requires immutable, cryptographically verifiable
-provenance binding the binary directly to its source.
+XZ Utils CVE-2024-3094). Release integrity requires verifiable provenance binding the artifact to its digest.
 - **[White House Executive Order 14028](https://www.whitehouse.gov/briefing-room/presidential-actions/2021/05/12/executive-order-on-improving-the-nations-cybersecurity/)**:
-  Mandates non-falsifiable software provenance and supply-chain attestations for enterprise software procurement.
+  Mandates verifiable software provenance and artifact integrity checks across software delivery.
 - **[OpenSSF SLSA Specification v1.0](https://slsa.dev/spec/v1.0/)**:
-  SLSA Build Level 3+ requires hermetic, reproducible builds with authenticated in-toto attestations.
-- **[NIST FIPS 204 (ML-DSA)](https://csrc.nist.gov/pubs/fips/204/final)**:
-  Standardizes post-quantum lattice-based digital signatures, ensuring attestations remain unforgeable past 2030.
-- **Automated CI Gates vs Manual Verification**: Manual verification of checksums and signatures is easily skipped
-  during urgent releases. Proven automates binary hashing, Merkle tree construction, and ML-DSA-65 attestation.
+  Defines the in-toto Statement v1 format used by Proven to bind binary SHA-256 digests and Merkle roots.
+- **Automated CI Gates vs Manual Verification**: Manual verification of checksums and attestations is easily skipped
+  during urgent releases. Proven automates SHA-256 hashing, Merkle tree construction, and HMAC-SHA256 verification.
 
 ## Autonomous Agent Integration
 
@@ -99,10 +95,10 @@ jobs:
    without external crates or OpenSSL dependencies.
 2. **Streaming Merkle Tree (`src/merkle.rs`)**: Chunks binaries into 64 KiB blocks, hashes leaves, and
    recursively computes a 32-byte Merkle root. Any single-bit change alters the Merkle root.
-3. **ML-DSA-65 In-Toto Attestation Envelope (`src/sign.rs`, `src/report.rs`)**: Formulates the canonical
-   payload `sha256:merkleRoot:keyId` into an in-toto Statement v1 JSON document with ML-DSA-65 envelope.
-4. **Air-Gapped Verification (`src/verify.rs`)**: Re-derives SHA-256 and Merkle root offline, verifying
-   integrity without relying on external network transparency logs.
+3. **HMAC-SHA256 In-Toto Attestation Envelope (`src/sign.rs`, `src/report.rs`)**: Formulates the canonical
+   payload `sha256:merkleRoot:keyId` into an in-toto Statement v1 JSON document signed with pure `std::` RFC 2104
+   HMAC-SHA256 (`PROVEN_SIGNING_KEY` env secret or key-id derivation).
+4. **Fail-Closed Verification (`src/verify.rs`)**: Re-derives SHA-256, Merkle root, and constant-time HMAC-SHA256 offline.
 5. **Bit-Reproducibility Guarantee (`tools/dev/repro.sh`)**: Asserts that `cargo build --locked --release --offline`
    matches checked-in cryptographic SHA-256 baselines bit-for-bit.
 
@@ -115,7 +111,7 @@ cargo install --git https://github.com/studio2201/proven
 # Compute SHA-256 and Merkle root hashes
 proven hash target/release/binary
 
-# Sign artifact with ML-DSA-65 envelope (text or json)
+# Sign artifact with HMAC-SHA256 envelope (text or json)
 proven sign target/release/binary -f json -o attestation.json
 
 # Verify artifact offline against attestation
@@ -138,14 +134,14 @@ proven doctor
 
 ## Badges & Status
 
-Certify SLSA Level 3+ provenance and quantum-safe ML-DSA-65 signatures:
+Emit in-toto v1 provenance and HMAC-SHA256 verification badges:
 
 ```markdown
-<!-- SLSA Level 3+ Provenance Badge -->
-[![SLSA Level](https://img.shields.io/badge/SLSA-Level%203%2B-blue.svg)](https://studio2201.com/proven)
+<!-- In-Toto Provenance Badge -->
+[![Provenance](https://img.shields.io/badge/provenance-in--toto%20v1-blue.svg)](https://studio2201.com/proven)
 
-<!-- Post-Quantum Cryptographic Attestation Badge -->
-[![Attestation](https://img.shields.io/badge/attestation-ML--DSA--65-blueviolet.svg)](https://studio2201.com/proven)
+<!-- Artifact Attestation Badge -->
+[![Attestation](https://img.shields.io/badge/attestation-HMAC--SHA256-2f6f5e.svg)](https://studio2201.com/proven)
 ```
 
 ## License

@@ -2,7 +2,7 @@
 use std::fmt;
 use std::path::PathBuf;
 
-pub const VERSION: &str = "0.2.11";
+pub const VERSION: &str = "0.2.12";
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum OutputFormat {
@@ -41,7 +41,7 @@ impl Default for CliConfig {
             subcommand: Subcommand::Sign,
             target_file: None,
             attestation_file: None,
-            key_id: "studio2201-pqc-identity".into(),
+            key_id: "studio2201-proven-key".into(),
             format: OutputFormat::Text,
             output_file: None,
             quiet: false,
@@ -84,16 +84,16 @@ impl From<std::io::Error> for CliError {
 
 pub fn print_help() {
     println!(
-        "proven {} — PQC-signed supply-chain attestor\n\
+        "proven {} — Supply-chain artifact attestor\n\
         \n\
         USAGE:\n\
           proven [SUBCOMMAND] [OPTIONS] [FILE]\n\
         \n\
         SUBCOMMANDS:\n\
           hash             Compute SHA-256 and Merkle root of artifact\n\
-          sign, attest     Attest binary artifact with ML-DSA-65 (default)\n\
+          sign, attest     Attest binary artifact with HMAC-SHA256 (default)\n\
           verify           Verify artifact against attestation envelope\n\
-          emit-slsa        Emit SLSA v1.0 / SLSA L3+ provenance predicate\n\
+          emit-slsa        Emit in-toto v1 / provenance JSON predicate\n\
           doctor           Inspect system health and environment\n\
           update, upgrade  Update binary to latest release\n\
           help             Print help information\n\
@@ -104,7 +104,7 @@ pub fn print_help() {
           -V, --version           Print version information\n\
           -f, --format <fmt>      Output format: text, json, slsa [default: text]\n\
           -o, --output <file>     Write output to file\n\
-          --key <key-id>          Signing key identity [default: studio2201-pqc-identity]\n\
+          --key <key-id>          Signing key identity [default: studio2201-proven-key]\n\
           --attestation <file>    Attestation file to verify against\n\
           -q, --quiet             Quiet mode; status code only\n\
           -v, --verbose           Verbose diagnostic logging\n\
