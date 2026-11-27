@@ -21,7 +21,7 @@ fn check_binary() -> DoctorCheck {
             name: "binary_integrity".into(),
             status: "error".into(),
             detail: format!("Binary not found at {}", exe.display()),
-            remediation: Some("Reinstall proven via install.sh".into()),
+            remediation: Some("Reinstall proven from GitHub Releases or cargo install --git https://github.com/studio2201/proven".into()),
         };
     }
     let size = fs::metadata(&exe).map(|m| m.len()).unwrap_or(0);
